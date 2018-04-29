@@ -42,15 +42,15 @@ public class Compiler {
     public static void main(String[] args) {
         int flagmaybe = 0, flag2 = 0;
         String backup = "PROGRAM|VAR|BEGIN|END|END.|FOR|READ|WRITE|TO|DO|;|=|\\+|FOR|\\(|\\)|\\*)";
-        String line = "PROGRAM BASICS VAR\n"
+       /* String line = "PROGRAM BASICS VAR\n"
                 + "X,A,B,C,Z BEGIN\n"
                 + "READ(X,Z,B) A := X+B;\n"
                 + "C := X+ Z;\n"
                 + "C := C * B;\n"
                 + "Z := A+B+C;\n"
-                + "WRITE(A,C,Z) END.";
+                + "WRITE(A,C,Z) END.";*/
 
-        //String line = "PROGRAM STATS VAR SUM,SUMSQ,I,VALUE,MEAN,IANCEBEGIN SUM:=100; SUMSQ:=0; FORI:=1 TO 100 DO BEGIN READ(VALUE,HQ,BO) SUM:=SUM+VALUE; SUMSQ:=SUMSQ+VALUE*VALUE; END END.";
+       String line = "PROGRAM STATS VAR SUM,SUMSQ,I,VALUE,MEAN,VARIANCEBEGIN SUM:=100; SUMSQ:=0; FORI:=1 TO 100 DO BEGIN READ(VALUE,HQ,BO) SUM:=SUM+VALUE; SUMSQ:=SUMSQ+VALUE*VALUE; END END.";
         line = line.replaceAll("\\s", "");
         TokenTable.create();
 
@@ -59,7 +59,8 @@ public class Compiler {
         String endtoken = new String();
         Regex.create();
         //String Validate="(PROGRAM)(.+)((?:(VAR)[\\s\\S]*?)VAR.+)((?:(BEGIN)[\\s\\S]*?)BEGIN.+)(END\\.)";
-        String Validate = "\\s*(PROGRAM)\\s*(.+)\\s*(VAR)\\s*(.+)\\s*(BEGIN)\\s*(\\s*.+\\s*)+\\s*(END\\.)\\s*";
+        //String Validate = "\\s*(PROGRAM)\\s*(.+)\\s*(VAR)\\s*(.+)\\s*(BEGIN)\\s*(\\s*.+\\s*)+\\s*(END\\.)\\s*";
+                String Validate="(PROGRAM)(\\w+)(VAR)(.+)(\\BBEGIN)(.+)(END\\.)";
 
         Pattern r = Pattern.compile(Validate);
         Matcher m = r.matcher(line);
@@ -75,7 +76,7 @@ public class Compiler {
                 }
                 
                 String[] parts = new String[30];
-                Variables=Variables.substring(0,line.indexOf("BEGIN"));
+              Variables=Variables.substring(0,line.indexOf("BEGIN"));
 
                 //Variables = Variables.replaceFirst("VAR", "");
                 parts = Variables.split(",");
