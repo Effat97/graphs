@@ -106,10 +106,16 @@ public class Compiler {
         }
 
         while (!line.equalsIgnoreCase("END.")) {
-            for (Map.Entry<String, String> entry : Regex.regex.entrySet()) {
+           // for (Map.Entry<String, String> entry : Regex.regex.entrySet()) {
 
-                if (entry.getKey().equalsIgnoreCase("WRITE") || entry.getKey().equalsIgnoreCase("READ")) {
-                    Pattern r2 = Pattern.compile(Regex.regex.get(entry.getKey()));
+                if (line.startsWith("WRITE") || line.startsWith("READ")) {
+                   Pattern r2;
+                    if(line.startsWith("WRITE"))
+                    { r2 = Pattern.compile(Regex.WRITE);}
+                    else{r2 = Pattern.compile(Regex.READ);}
+                   
+                    
+                    
                     Matcher m2 = r2.matcher(line);
                     if (m2.find()) {
 
@@ -151,7 +157,34 @@ public class Compiler {
                         line = line.replaceFirst("\\)", "");
 
                     }
-                } else if (entry.getKey().equalsIgnoreCase("ASSIGN")) {
+                }  else if (line.startsWith("FOR")) {
+                    Pattern r2 = Pattern.compile(Regex.FOR);
+                    Matcher m2 = r2.matcher(line);
+                    if (m2.find()) {
+                        flag2 = 0;
+                        flag2 = find(m2.group(2));
+                        if (flag2 == 0) {
+                            System.out.println("Undefined Variable3" + m2.group(2));
+                            return;
+                        }
+                        for (int i = 1; i < 9; i++) {
+                            tokens.add(m2.group(i));
+                        }
+                        for (int i = 1; i < 9; i++) {
+                            line = line.replaceFirst(m2.group(i), "");
+                        }
+
+                    }
+                } else if (line.startsWith("END")&& line.length()>4) {
+                    Pattern r2 = Pattern.compile(Regex.END);
+                    Matcher m2 = r2.matcher(line);
+                    if (m2.find()) {
+                        tokens.add(m2.group(1));
+
+                        line = line.replaceFirst(m2.group(1), "");
+
+                    }
+                } else {
                     Pattern r2 = Pattern.compile(Regex.ASSIGN);
                     Matcher m2 = r2.matcher(line);
                     if (m2.find()) {
@@ -200,36 +233,9 @@ public class Compiler {
                         tokens.add(m2.group(5));
                         line = line.replaceFirst(m2.group(5), "");
                     }
-                } else if (entry.getKey().equalsIgnoreCase("FOR")) {
-                    Pattern r2 = Pattern.compile(Regex.FOR);
-                    Matcher m2 = r2.matcher(line);
-                    if (m2.find()) {
-                        flag2 = 0;
-                        flag2 = find(m2.group(2));
-                        if (flag2 == 0) {
-                            System.out.println("Undefined Variable3" + m2.group(2));
-                            return;
-                        }
-                        for (int i = 1; i < 9; i++) {
-                            tokens.add(m2.group(i));
-                        }
-                        for (int i = 1; i < 9; i++) {
-                            line = line.replaceFirst(m2.group(i), "");
-                        }
-
-                    }
-                } else if (entry.getKey().equalsIgnoreCase("END")) {
-                    Pattern r2 = Pattern.compile(Regex.END);
-                    Matcher m2 = r2.matcher(line);
-                    if (m2.find()) {
-                        tokens.add(m2.group(1));
-
-                        line = line.replaceFirst(m2.group(1), "");
-
-                    }
                 }
             }
-        }
+        //}
         tokens.add(line);
         
      
