@@ -5,6 +5,8 @@
  */
 package compiler;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -22,11 +24,12 @@ public class Compiler {
     static ArrayList<String> tokens = new ArrayList<String>();
 
     public static int find(String X) {
-       int flag = 0, i = 0;  
-       if( X.matches("[0-9]+"))
-       {flag = 1;
-                return flag;}
-       
+        int flag = 0, i = 0;
+        if (X.matches("[0-9]+")) {
+            flag = 1;
+            return flag;
+        }
+
         int beg, end;
         beg = tokens.indexOf("VAR");
         end = tokens.indexOf("BEGIN");
@@ -39,10 +42,11 @@ public class Compiler {
         return flag;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
+       long start= System.currentTimeMillis();
         int flagmaybe = 0, flag2 = 0;
-        String backup = "PROGRAM|VAR|BEGIN|END|END.|FOR|READ|WRITE|TO|DO|;|=|\\+|FOR|\\(|\\)|\\*)";
-       /* String line = "PROGRAM BASICS VAR\n"
+        // String backup = "PROGRAM|VAR|BEGIN|END|END.|FOR|READ|WRITE|TO|DO|;|=|\\+|FOR|\\(|\\)|\\*)";
+        /* String line = "PROGRAM BASICS VAR\n"
                 + "X,A,B,C,Z BEGIN\n"
                 + "READ(X,Z,B) A := X+B;\n"
                 + "C := X+ Z;\n"
@@ -50,7 +54,8 @@ public class Compiler {
                 + "Z := A+B+C;\n"
                 + "WRITE(A,C,Z) END.";*/
 
-       String line = "PROGRAM STATS VAR SUM,SUMSQ,I,VALUE,MEAN,VARIANCEBEGIN SUM:=100; SUMSQ:=0; FORI:=1 TO 100 DO BEGIN READ(VALUE,HQ,BO) SUM:=SUM+VALUE; SUMSQ:=SUMSQ+VALUE*VALUE; END END.";
+        //String line = "PROGRAM STATS VAR SUM,SUMSQ,I,VALUE,MEAN,VARIANCEBEGIN SUM:=I+SUMSQ*SUM+I+MEAN*VARIANCE*SUMSQ+I+I*VALUE+I;  END.";
+        String line = "PROGRAM STATS VAR SUM,SUMSQ,I,VALUE,MEAN,VARIANCEBEGIN SUM:=0; SUMSQ:=0; FORI:=1 TO 100 DO BEGIN READ(VALUE) SUM:=SUM+VALUE; SUMSQ:=SUMSQ+VALUE*VALUE; END WRITE(MEAN,VARIANCE) END.";
         line = line.replaceAll("\\s", "");
         TokenTable.create();
 
@@ -58,11 +63,10 @@ public class Compiler {
         String temp = new String();
         String endtoken = new String();
         Regex.create();
-        //String Validate="(PROGRAM)(.+)((?:(VAR)[\\s\\S]*?)VAR.+)((?:(BEGIN)[\\s\\S]*?)BEGIN.+)(END\\.)";
-        //String Validate = "\\s*(PROGRAM)\\s*(.+)\\s*(VAR)\\s*(.+)\\s*(BEGIN)\\s*(\\s*.+\\s*)+\\s*(END\\.)\\s*";
-                String Validate="(PROGRAM)(\\w+)(VAR)(.+)(\\BBEGIN)(.+)(END\\.)";
+ 
+        String Validate = "(PROGRAM)(\\w+)(VAR)(.+)(\\BBEGIN)(.+)(END\\.)";
 
-        Pattern r = Pattern.compile(Validate);
+        Pattern r = Pattern.compile(Regex.Validate);
         Matcher m = r.matcher(line);
         if (m.find()) {
             if (m.matches()) {
@@ -74,9 +78,9 @@ public class Compiler {
                 for (int i = 1; i < 4; i++) {
                     line = line.replaceFirst(m.group(i), "");
                 }
-                
+
                 String[] parts = new String[30];
-              Variables=Variables.substring(0,line.indexOf("BEGIN"));
+                Variables = Variables.substring(0, line.indexOf("BEGIN"));
 
                 //Variables = Variables.replaceFirst("VAR", "");
                 parts = Variables.split(",");
@@ -85,7 +89,10 @@ public class Compiler {
                         if (!parts[i].matches("\\s*")) {
                             if (!parts[i].matches("[0-9].*")) {
                                 tokens.add(parts[i]);
-                            } else{System.out.println("Variable can not start with a digit"); return;}
+                            } else {
+                                System.out.println("Variable can not start with a digit");
+                                return;
+                            }
 
                         }
                     }
@@ -93,7 +100,7 @@ public class Compiler {
                 }
                 tokens.add(m.group(5));
                 endtoken = m.group(7);
-line=line.replaceFirst(Variables, "");
+                line = line.replaceFirst(Variables, "");
                 line = line.replaceFirst(m.group(5), "");
             }
         }
@@ -115,6 +122,17 @@ line=line.replaceFirst(Variables, "");
                         Variables = Variables.replaceAll("\\(", "");
                         Variables = Variables.replaceAll("\\)", "");
                         parts = Variables.split(",");
+                        flag2 = 0;
+                        for(int k=0;k<parts.length;k++)
+                        {   flag2 = find(parts[k]);
+                        if (flag2 == 0) {
+                            System.out.println("Undefined Variable read or write" + parts[k]);
+                            return;
+                        }
+                        }
+                        
+                        
+                        
                         for (int i = 0; i < parts.length; i++) {
                             if (!parts[i].isEmpty()) {
                                 if (!parts[i].matches("\\s*")) {
@@ -213,29 +231,24 @@ line=line.replaceFirst(Variables, "");
             }
         }
         tokens.add(line);
-
-
-        /*  while (!line.equals("") || line.equalsIgnoreCase("END.")) {
-            flag2 = 0;            
-            temp = "";
-            line = line.replaceAll("\\s", "");
-            for (int j = 0; j < 10; j++) {
-                if (line.charAt(0) == TokenTable.tokentable[j].charAt(0)) {
-                    flagmaybe = 1;
-                    break;
-                }
-                
-            }
-            
-            for (int i = 0; i < 10; i++) {
-                temp += line.charAt(i);
-                flag2 = TokenTable.findMatch(temp);
-                if (flag2 == 1) {
-                    tokens.add(temp);
-                }
-                
-            }
-            
-        } */
+        
+     
+        
+        CG.createLines();
+        CG.createFile();
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+long end= System.currentTimeMillis();
+        System.out.println(end-start+"ms");
     }
 }

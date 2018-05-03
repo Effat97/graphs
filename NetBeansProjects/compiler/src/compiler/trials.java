@@ -90,5 +90,27 @@ line=newStr;
 
     }
              }*/
+            /*  while (!line.equals("") || line.equalsIgnoreCase("END.")) {
+            flag2 = 0;            
+            temp = "";
+            line = line.replaceAll("\\s", "");
+            for (int j = 0; j < 10; j++) {
+                if (line.charAt(0) == TokenTable.tokentable[j].charAt(0)) {
+                    flagmaybe = 1;
+                    break;
+                }
+                
+            }
+            
+            for (int i = 0; i < 10; i++) {
+                temp += line.charAt(i);
+                flag2 = TokenTable.findMatch(temp);
+                if (flag2 == 1) {
+                    tokens.add(temp);
+                }
+                
+            }
+            
+        } */
     
 }
