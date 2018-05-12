@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Stack;
 
 /**
  *
@@ -27,7 +28,9 @@ public class CG {
     static int firstInstruction = 4;
     static String lastloop = "";
     static int counter = 0;
-
+static Stack st = new Stack();
+static Stack st2 = new Stack();
+static Stack st3 = new Stack();
     public static void start() {
 
         lines.add(Compiler.tokens.get(1) + sp + "START" + sp + "0");//0
@@ -51,9 +54,9 @@ public class CG {
     }
 
     public static void end() {
-        lines.add(sk + "LDA" + sp + lastloop);
+        lines.add(sk + "LDA" + sp + st.pop());
         lines.add(sk + "ADD" + sp + "#1");
-        lines.add(sk + "J" + sp + "L" + Integer.toString(LCount - 1));
+        lines.add(sk + "J" + sp + "L" + st2.pop());
 
         loops[counter] = lines.size();
         counter++;
@@ -68,6 +71,7 @@ public class CG {
             Compiler.tokens.remove(0);
 
             LCount++;
+            st2.push(LCount);
             lines.add(sk + "LDA" + sp + "#" + Compiler.tokens.get(2)
             );
             lines.add("L" + Integer.toString(LCount) + sp + "STA" + sp + Compiler.tokens.get(0));
@@ -77,9 +81,12 @@ public class CG {
                 lines.add(sk + "COMP" + sp + Compiler.tokens.get(4));
             }
             LCount++;
+            st3.push(LCount);
             lines.add(sk + "JGT" + sp + "L" + Integer.toString(LCount));
 
-            lastloop = Compiler.tokens.get(0);
+           // lastloop = Compiler.tokens.get(0);
+           st.push(Compiler.tokens.get(0));
+          
         
         for (int i = 0; i < 7; i++) {
             Compiler.tokens.remove(0);
@@ -529,7 +536,7 @@ public class CG {
             lines.add(endinglines.get(i));
         }
         for (i = 0; i < counter; i++) {
-            lines.set(loops[i], "L" + Integer.toString(2 * i + 2) + sp + lines.get(loops[i]));
+            lines.set(loops[i], "L" + st3.pop() + sp + lines.get(loops[i]));
         }
     }
 
