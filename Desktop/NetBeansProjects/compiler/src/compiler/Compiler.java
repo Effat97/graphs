@@ -8,10 +8,12 @@ package compiler;
 import java.io.FileNotFoundException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Scanner;
 /**
  *
  * @author fetouh
@@ -42,8 +44,40 @@ public class Compiler {
         return flag;
     }
 
-    public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
-        long start = System.currentTimeMillis();
+    public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException, IOException {
+       long start = System.currentTimeMillis();
+        //String hlFile="";
+        //System.out.println(args.length); 
+     // Scanner sc = new Scanner(System.in);
+     // hlFile=sc.next();
+        
+        
+        //args[0]="input.txt";
+    BufferedReader br = new BufferedReader(new FileReader(args[0]));
+    
+        StringBuilder sb = new StringBuilder();
+        String linefile = br.readLine();
+
+        while (linefile != null) {
+            sb.append(linefile);
+            sb.append("\n");
+            linefile = br.readLine();
+        }
+    String  line=  sb.toString();
+   
+        br.close();
+    
+    
+
+	
+
+
+        
+        
+        
+        
+        
+        
         int flagmaybe = 0, flag2 = 0;
         // String backup = "PROGRAM|VAR|BEGIN|END|END.|FOR|READ|WRITE|TO|DO|;|=|\\+|FOR|\\(|\\)|\\*)";
         /* String line = "PROGRAM BASICS VAR\n"
@@ -55,7 +89,7 @@ public class Compiler {
                 + "WRITE(A,C,Z) END.";*/
 
         //String line = "PROGRAM STATS VAR SUM,SUMSQ,I,VALUE,MEAN,VARIANCEBEGIN SUM:=I+SUMSQ*SUM+I+MEAN*VARIANCE*SUMSQ+I+I*VALUE+I;  END.";
-        String line = "PROGRAM STATS VAR SUM,SUMSQ,I,VALUE,MEAN,VARIANCEBEGIN SUM:=0; SUMSQ:=0; FORI:=1 TO 100 DO BEGIN READ(VALUE) SUM:=SUM+VALUE; SUMSQ:=SUMSQ+VALUE*VALUE; END FORI:=1 TO 100 DO BEGIN READ(VALUE) SUM:=SUM+VALUE; SUMSQ:=SUMSQ+VALUE*VALUE+SUMSQ+VALUE*VALUE+SUMSQ+VALUE*VALUE; END WRITE(MEAN,VARIANCE) END.";
+       // String line = "PROGRAM STATS VAR SUM,SUMSQ,I,VALUE,MEAN,VARIANCEBEGIN SUM:=0; SUMSQ:=0; FORI:=1 TO 100 DO BEGIN READ(VALUE) SUM:=SUM+VALUE; SUMSQ:=SUMSQ+VALUE*VALUE; END FORI:=1 TO 100 DO BEGIN READ(VALUE) SUM:=SUM+VALUE; SUMSQ:=SUMSQ+VALUE*VALUE+SUMSQ+VALUE*VALUE+SUMSQ+VALUE*VALUE; END WRITE(MEAN,VARIANCE) END.";
         line = line.replaceAll("\\s", "");
         TokenTable.create();
 
@@ -147,12 +181,14 @@ public class Compiler {
                     }
 
                     tokens.add(m2.group(5));
+                    tokens.add(m2.group(6));
                     for (int i = 1; i < 3; i++) {
                         line = line.replaceFirst(m2.group(i), "");
                     }
                     line = line.replaceFirst("\\(", "");
 
                     line = line.replaceFirst("\\)", "");
+                     line = line.replaceFirst(";", "");
 
                 }
             } else if (line.startsWith("FOR")) {
@@ -203,17 +239,22 @@ public class Compiler {
                         int j = 0;
                         String temp2 = new String();
                         temp2 = "";
-                        while (line.charAt(j) != '+' && line.charAt(j) != '*' && line.charAt(j) != ';') {
+                        if (line.charAt(0) == '(')
+                        {temp2 += line.charAt(0);
+                            tokens.add(temp2);
+                            line = line.replaceFirst("\\(", "");}
+                        temp2 = "";
+                        while (line.charAt(j) != '+' && line.charAt(j) != '*' && line.charAt(j) != ';' && line.charAt(j) != '(' && line.charAt(j) != ')') {
                             temp2 += line.charAt(j);
                             j++;
                         }
-                        flag2 = find(temp2);
+                       if(!temp2.isEmpty()) { flag2 = find(temp2);
                         if (flag2 == 0) {
                             System.out.println("Undefined Variable2" + temp2);
                             return;
                         }
                         tokens.add(temp2);
-                        line = line.replaceFirst(temp2, "");
+                        line = line.replaceFirst(temp2, ""); }
                         j = 0;
                         temp2 = "";
                         if (line.charAt(0) == '+') {
@@ -225,6 +266,12 @@ public class Compiler {
                             temp2 += line.charAt(0);
                             tokens.add(temp2);
                             line = line.replaceFirst("\\*", "");
+                        
+
+                        } else if (line.charAt(0) == ')') {
+                            temp2 += line.charAt(0);
+                            tokens.add(temp2);
+                            line = line.replaceFirst("\\)", "");
                         }
 
                     }
@@ -237,7 +284,7 @@ public class Compiler {
         tokens.add(line);
 
         CG.createLines();
-        CG.createFile();
+        CG.createFile(args[0]);
 
         long end = System.currentTimeMillis();
         System.out.println(end - start + "ms");

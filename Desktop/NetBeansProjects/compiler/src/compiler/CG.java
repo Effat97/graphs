@@ -62,17 +62,25 @@ public class CG {
 
     public static void forLoop() {
 
-        Compiler.tokens.remove(0);
+        int k = 0, nested = 0,imp=0;
+        
 
-        LCount++;
-        lines.add(sk + "LDA" + sp + "#" + Compiler.tokens.get(2)
-        );
-        lines.add("L" + Integer.toString(LCount) + sp + "STA" + sp + Compiler.tokens.get(0));
-        lines.add(sk + "COMP" + sp + "#" + Compiler.tokens.get(4));
-        LCount++;
-        lines.add(sk + "JGT" + sp + "L" + Integer.toString(LCount));
+            Compiler.tokens.remove(0);
 
-        lastloop = Compiler.tokens.get(0);
+            LCount++;
+            lines.add(sk + "LDA" + sp + "#" + Compiler.tokens.get(2)
+            );
+            lines.add("L" + Integer.toString(LCount) + sp + "STA" + sp + Compiler.tokens.get(0));
+            if (Compiler.tokens.get(4).matches("\\d+")) {
+                lines.add(sk + "COMP" + sp + "#" + Compiler.tokens.get(4));
+            } else {
+                lines.add(sk + "COMP" + sp + Compiler.tokens.get(4));
+            }
+            LCount++;
+            lines.add(sk + "JGT" + sp + "L" + Integer.toString(LCount));
+
+            lastloop = Compiler.tokens.get(0);
+        
         for (int i = 0; i < 7; i++) {
             Compiler.tokens.remove(0);
         }
@@ -105,6 +113,7 @@ public class CG {
 
                 }
                 Compiler.tokens.remove(0);
+                Compiler.tokens.remove(0);
                 lines.add(sk + "WORD" + sp + Integer.toString(Variables.size()));
                 for (i = 0; i < Variables.size(); i++) {
                     lines.add(sk + "WORD" + sp + Variables.get(i));
@@ -132,6 +141,7 @@ public class CG {
 
                 }
                 Compiler.tokens.remove(0);
+                Compiler.tokens.remove(0);
                 lines.add(sk + "WORD" + sp + Integer.toString(Variables.size()));
                 for (i = 0; i < Variables.size(); i++) {
                     lines.add(sk + "WORD" + sp + Variables.get(i));
@@ -149,7 +159,7 @@ public class CG {
                     Variables.add(Compiler.tokens.get(i));
                     i++;
 
-                }                                                                       
+                }
                 Variables.add(Compiler.tokens.get(i));
                 i = 0;
                 while (!Compiler.tokens.get(0).equalsIgnoreCase(";")) {
@@ -169,6 +179,7 @@ public class CG {
                     lines.add(sk + "STA" + sp + Variables.get(0));
                 } else {
                     int plusflag = 0, timesflag = 0;
+                    int bracketflagL = 0, bracketflagR = 0;
                     int duplicates = 0;
                     i = 0;
 
@@ -179,10 +190,99 @@ public class CG {
                         if (Variables.get(i).equals("*")) {
                             timesflag = 1;
                         }
+                        if (Variables.get(i).equals("(")) {
+                            bracketflagL = 1;
+                        }
+                        if (Variables.get(i).equals(")")) {
+                            bracketflagR = 1;
+                        }
 
                         i++;
                     }
+                    if (bracketflagR == 1 && bracketflagL == 0) {
+                        System.out.println("brackets error");
+                    } else if (bracketflagR == 0 && bracketflagL == 1) {
+                        System.out.println("brackets error");
+                    } else if (bracketflagR == 1 && bracketflagL == 1) {
+                        if ((Variables.indexOf("(") == Variables.indexOf(":=") + 1) && ((Variables.indexOf(")") == Variables.indexOf(";") - 1))) {
+                            Variables.remove("(");
+                            Variables.remove(")");
+                        } else if (plusflag == 0 && timesflag == 1) {
+                            Variables.remove("(");
+                            Variables.remove(")");
+                        } else if (plusflag == 1 && timesflag == 0) {
+                            Variables.remove("(");
+                            Variables.remove(")");
+                        } else {
+                            int k = 1;
+                            if (Variables.get(Variables.indexOf("(") + k).matches("\\d+")) {
+                                lines.add(sk + "LDA" + sp + "#" + Variables.get(Variables.indexOf("(") + k));
 
+                            } else {
+                                lines.add(sk + "LDA" + sp + Variables.get(Variables.indexOf("(") + k));
+                            }
+                            k++;
+                            if (Variables.get(Variables.indexOf("(") + k).matches("\\+")) {
+                                k++;
+                                if (Variables.get(Variables.indexOf("(") + k).matches("\\d+")) {
+                                    lines.add(sk + "ADD" + sp + "#" + Variables.get(Variables.indexOf("(") + k));
+                                } else {
+                                    lines.add(sk + "ADD" + sp + Variables.get(Variables.indexOf("(") + k));
+                                }
+
+                            } else if (Variables.get(Variables.indexOf("(") + k).matches("\\*")) {
+                                k++;
+                                if (Variables.get(Variables.indexOf("(") + k).matches("\\d+")) {
+                                    lines.add(sk + "MUL" + sp + "#" + Variables.get(Variables.indexOf("(") + k));
+                                } else {
+                                    lines.add(sk + "MUL" + sp + Variables.get(Variables.indexOf("(") + k));
+                                }
+
+                            }
+                            k = k + 2;
+                            if (Variables.get(Variables.indexOf("(") + k).matches("\\+")) {
+                                k++;
+                                if (Variables.get(Variables.indexOf("(") + k).matches("\\d+")) {
+                                    lines.add(sk + "ADD" + sp + "#" + Variables.get(Variables.indexOf("(") + k));
+                                } else {
+                                    lines.add(sk + "ADD" + sp + Variables.get(Variables.indexOf("(") + k));
+                                }
+
+                            } else if (Variables.get(Variables.indexOf("(") + k).matches("\\*")) {
+                                k++;
+                                if (Variables.get(Variables.indexOf("(") + k).matches("\\d+")) {
+                                    lines.add(sk + "MUL" + sp + "#" + Variables.get(Variables.indexOf("(") + k));
+                                } else {
+                                    lines.add(sk + "MUL" + sp + Variables.get(Variables.indexOf("(") + k));
+                                }
+
+                            } else if (Variables.get(Variables.indexOf("(") + k).matches(";")) {
+                                k = -1;
+
+                                if (Variables.get(Variables.indexOf("(") + k).matches("\\+")) {
+                                    k--;
+                                    if (Variables.get(Variables.indexOf("(") + k).matches("\\d+")) {
+                                        lines.add(sk + "ADD" + sp + "#" + Variables.get(Variables.indexOf("(") + k));
+                                    } else {
+                                        lines.add(sk + "ADD" + sp + Variables.get(Variables.indexOf("(") + k));
+                                    }
+
+                                } else if (Variables.get(Variables.indexOf("(") + k).matches("\\*")) {
+                                    k--;
+                                    if (Variables.get(Variables.indexOf("(") + k).matches("\\d+")) {
+                                        lines.add(sk + "MUL" + sp + "#" + Variables.get(Variables.indexOf("(") + k));
+                                    } else {
+                                        lines.add(sk + "MUL" + sp + Variables.get(Variables.indexOf("(") + k));
+                                    }
+
+                                }
+
+                            }
+                            lines.add(sk + "STA" + sp + Variables.get(0));
+                            continue;
+                        }
+                    }
+                    //skip                 
                     if (plusflag == 0 && timesflag == 0) {
                         System.out.println("error this shouldnt happen");
                     } else if (plusflag == 1 && timesflag == 0) { //ADDfunction
@@ -195,7 +295,6 @@ public class CG {
                             i++;
                         }
 
-                        
                         if (duplicates != 0) {
                             lines.add(sk + "LDA" + sp + Variables.get(duplicates));
                             i = 2;
@@ -216,7 +315,7 @@ public class CG {
 
                             }
                         } else {
-                            
+
                             if (Variables.get(2).matches("\\d+")) {
                                 lines.add(sk + "LDA" + sp + "#" + Variables.get(2));
 
@@ -246,7 +345,6 @@ public class CG {
                             i++;
                         }
 
-                       
                         if (duplicates != 0) {
                             lines.add(sk + "LDA" + sp + Variables.get(duplicates));
                             i = 2;
@@ -267,7 +365,7 @@ public class CG {
 
                             }
                         } else {
-                            
+
                             if (Variables.get(2).matches("\\d+")) {
                                 lines.add(sk + "LDA" + sp + "#" + Variables.get(2));
 
@@ -329,7 +427,7 @@ public class CG {
                             while (Variables.contains("*")) {
 
                                 int j = 2;
-                                
+
                                 if (Variables.get(Variables.indexOf("*") - 1).matches("\\d+")) {
                                     lines.add(sk + "LDA" + sp + "#" + Variables.get(Variables.indexOf("*") - 1));
 
@@ -351,7 +449,7 @@ public class CG {
                                         lines.add(sk + "MUL" + sp + Variables.get(Variables.indexOf("*") + j + 1));
                                     }
                                     j = j + 2;
-                                    
+
                                 }
                                 j--;
                                 j = Variables.indexOf("*") + j;
@@ -377,7 +475,6 @@ public class CG {
                                 i++;
                             }
 
-                        
                             if (duplicates != 0) {
                                 lines.add(sk + "LDA" + sp + Variables.get(duplicates));
                                 i = 2;
@@ -398,7 +495,7 @@ public class CG {
 
                                 }
                             } else {
-                                
+
                                 if (Variables.get(2).matches("\\d+")) {
                                     lines.add(sk + "LDA" + sp + "#" + Variables.get(2));
 
@@ -436,8 +533,14 @@ public class CG {
         }
     }
 
-    public static void createFile() throws FileNotFoundException, UnsupportedEncodingException {
-        PrintWriter writer = new PrintWriter("SICXEcode2", "UTF-8");
+    public static void createFile(String x) throws FileNotFoundException, UnsupportedEncodingException {
+        // x = x.replaceAll("\\.txt", "");
+        if (x.endsWith(".txt")) {
+            x = x.replaceAll("\\.txt", "");
+        } else if (x.endsWith(".pas")) {
+            x = x.replaceAll("\\.pas", "");
+        }
+        PrintWriter writer = new PrintWriter(x + ".asm");
         for (int i = 0; i < lines.size(); i++) {
             lines.set(i, lines.get(i).replaceAll("\\s+", "\t\t\t"));
 

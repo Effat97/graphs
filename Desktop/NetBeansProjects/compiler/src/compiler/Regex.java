@@ -16,10 +16,10 @@ public class Regex {
     //String Validate = "\\s*(PROGRAM)\\s*(.+)\\s*(VAR)\\s*(.+)\\s*(BEGIN)\\s*(\\s*.+\\s*)+\\s*(END\\.)\\s*";
 
     public final static String Validate = "(PROGRAM)(\\w+)(VAR)(.+)(\\BBEGIN)(.+)(END\\.)";
-    public final static String READ = "\\G(READ)\\s*((\\()\\s*(\\w+,*)+\\s*(\\))).*";
-    public final static String WRITE = "\\G(WRITE)\\s*((\\()\\s*(\\w+,*)+\\s*(\\))).*";
-    public static final String ASSIGN = "\\G(\\w+)+(:=)((\\w+\\+*|\\**)+)(;)";
-    public static final String FOR = "\\G(FOR)(\\w+)(:=)(\\d+)(TO)(\\d+)(DO)(BEGIN)";
+    public final static String READ = "\\G(READ)\\s*((\\()\\s*(\\w+,*)+\\s*(\\)))(;).*";
+    public final static String WRITE = "\\G(WRITE)\\s*((\\()\\s*(\\w+,*)+\\s*(\\)))(;).*";
+    public static final String ASSIGN = "\\G(\\w+)+(:=)((.+\\+*|\\**)+)(;)";
+    public static final String FOR = "\\G(FOR)(\\w+)(:=)(\\d+)(TO)(\\w+)(DO)(BEGIN)";
     public static final String END = "\\G(END)...+";
     public final static HashMap<String, String> regex = new HashMap<String, String>();
 

@@ -22,6 +22,7 @@ L1			STA			I
 			WORD			VALUE
 			LDA			SUM
 			ADD			VALUE
+			MUL			SUM
 			STA			SUM
 			LDA			VALUE
 			MUL			VALUE
@@ -30,10 +31,42 @@ L1			STA			I
 			LDA			I
 			ADD			#1
 			J			L1
-L2			+JSUB			XWRITE
+L2			LDA			#1
+L3			STA			I
+			COMP			#100
+			JGT			L4
+			+JSUB			XREAD
+			WORD			1
+			WORD			VALUE
+			LDA			SUM
+			ADD			VALUE
+			STA			SUM
+			LDA			VALUE
+			MUL			VALUE
+			STA			T1
+			LDA			VALUE
+			MUL			VALUE
+			STA			T2
+			LDA			VALUE
+			MUL			VALUE
+			STA			T3
+			LDA			SUMSQ
+			ADD			T1
+			ADD			SUMSQ
+			ADD			T2
+			ADD			SUMSQ
+			ADD			T3
+			STA			SUMSQ
+			LDA			I
+			ADD			#1
+			J			L3
+L4			+JSUB			XWRITE
 			WORD			2
 			WORD			MEAN
 			WORD			VARIANCE
 			LDL			RETADR
 			RSUB
+T1			RESW			1
+T2			RESW			1
+T3			RESW			1
 			END
